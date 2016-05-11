@@ -1,0 +1,1 @@
+def collect(graph : Graph, v):
