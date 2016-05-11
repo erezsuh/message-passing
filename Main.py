@@ -2,8 +2,8 @@ from TransmissionNetwork.Graph import Graph
 from TransmissionNetwork.Edge import Edge
 from TransmissionNetwork.Vertex import Vertex
 
-def get_transmission_distribution(flip_probability):
-    return {0 : flip_probability}
+def test(dict):
+    dict["a"] = 3
 
 
 def main():
@@ -36,4 +36,5 @@ def main():
         vertices = graph.get_neighbour_vertices(v)
         print("Vertex: %s has edges: %s" % (v.name, ','.join([str(e) for e in vertices])))
 main()
+
 

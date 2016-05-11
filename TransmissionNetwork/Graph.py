@@ -22,3 +22,10 @@ class Graph:
 
     def get_neighbour_edges(self, vertex: Vertex):
         return [e for e in self.edges if e.contains(vertex)]
+
+    def get_edge(self, v1: Vertex, v2: Vertex) -> Edge:
+        for e in self.edges:
+            if e.contains(v1) and e.contains(v2):
+                return e
+
+
