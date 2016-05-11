@@ -2,14 +2,14 @@ from TransmissionNetwork.Graph import Graph
 from TransmissionNetwork.Vertex import Vertex
 from TransmissionNetwork.Edge import Edge
 from Utils import VectorUtils
-
+from enum import Enum
 class MessagePassingAlgorithm:
     def __init__(self, graph: Graph, root: Vertex):
         self.graph = graph
         self.root = root
         self.phi = {vertex: [1, 1] for vertex in self.graph.vertices}
         self.messages = {edge: [0, 0] for edge in self.graph.edges}
-        self.did_collect = {vertex: False for vertex in self.graph.vertices}
+        self.vertex_status = {vertex: VertexStatus.new for vertex in self.graph.vertices}
 
     def computeMarginals(self):
         collect_result = self.collect(self.root)
@@ -17,16 +17,17 @@ class MessagePassingAlgorithm:
         #distribute(root, None)
 
     def collect(self, vertex: Vertex) -> float:
-        self.did_collect[vertex] = True
+        self.vertex_status[vertex] = VertexStatus.in_progress
         if not self.graph.is_leaf(vertex):
             for neighbour_vertex in self.graph.get_neighbour_vertices(vertex):
-                if self.did_collect[neighbour_vertex]:
+                if self.vertex_status[neighbour_vertex] is VertexStatus.in_progress:
                     # parent
                     continue
                 neighbour_edge = self.graph.get_edge(neighbour_vertex, vertex)
                 self.messages[neighbour_edge] = self.collect(neighbour_vertex)
                 self.phi[vertex] = VectorUtils.multiply_vectors(self.phi[vertex],
                                                                 self.messages[neighbour_edge])
+        self.vertex_status[vertex] = VertexStatus.finished
         if vertex is self.root:
             return self.phi[vertex]
         else:
@@ -35,7 +36,7 @@ class MessagePassingAlgorithm:
     def get_vertex_parent(self, vertex: Vertex) -> Vertex:
         neighbours = self.graph.get_neighbour_vertices(vertex)
         for neighbour in neighbours:
-            if self.did_collect[neighbour]:
+            if self.vertex_status[neighbour] is VertexStatus.in_progress:
                 return neighbour
 
     def generate_message(self, vertex: Vertex):
@@ -56,3 +57,8 @@ class MessagePassingAlgorithm:
             return [1 - edge.flip_probability, edge.flip_probability]
         else:
             return [edge.flip_probability, 1 - edge.flip_probability]
+
+class VertexStatus(Enum):
+    new = 1
+    in_progress = 2
+    finished = 3
