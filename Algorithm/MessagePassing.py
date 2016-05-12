@@ -80,6 +80,10 @@ class MessagePassingAlgorithm:
         return [[1 - edge.flip_probability, edge.flip_probability],
                 [edge.flip_probability, 1 - edge.flip_probability]]
 
+    def print_marginals(self):
+        for vertex in self.graph.vertices:
+            print("vertex: %s has marginal %s" %(vertex, self.marginals[vertex]))
+
 
 class VertexStatus(Enum):
     new = 1

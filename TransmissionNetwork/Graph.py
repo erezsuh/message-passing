@@ -28,4 +28,3 @@ class Graph:
             if e.contains(v1) and e.contains(v2):
                 return e
 
-
