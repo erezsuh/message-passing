@@ -36,7 +36,7 @@ def main():
     #     print("Vertex: %s has edges: %s" % (v.name, ','.join([str(e) for e in vertices])))
 
     algorithm = MessagePassingAlgorithm(graph, graph.vertices[0])
-    algorithm.computeMarginals()
+    algorithm.compute_marginals()
 main()
 
 
