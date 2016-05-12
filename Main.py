@@ -37,6 +37,7 @@ def main():
 
     algorithm = MessagePassingAlgorithm(graph, graph.vertices[0])
     algorithm.compute_marginals()
+    print(algorithm.marginals)
 main()
 
 
