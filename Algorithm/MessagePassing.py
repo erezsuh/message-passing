@@ -33,15 +33,19 @@ class MessagePassingAlgorithm:
                                                                 self.collect_messages[child_edge])
         self.vertex_status[vertex] = VertexStatus.finished
         if vertex is self.root:
-            return self.phi[vertex]
+            return
         else:
             return self.generate_collect_message(vertex)
 
     def generate_collect_message(self, vertex: Vertex):
         parent_vertex = self.get_vertex_parent(vertex)
         parent_edge = self.graph.get_edge(vertex, parent_vertex)
-        return VectorUtils.multiply_matrix_and_vector(self.generate_transmission_distribution_matrix(parent_edge),
-                                                      self.phi[vertex])
+        result = [0, 0]
+        transmission_matrix = self.generate_transmission_distribution_matrix(parent_edge)
+        for i in [0, 1]:
+            result[i] = transmission_matrix[i][0] * self.phi[vertex][0] + \
+                        transmission_matrix[i][1] * self.phi[vertex][1]
+        return result
 
     def distribute(self, vertex: Vertex):
         self.vertex_status[vertex] = VertexStatus.in_progress
@@ -73,7 +77,7 @@ class MessagePassingAlgorithm:
         distribution_matrix = self.generate_transmission_distribution_matrix(edge)
         for i in [0, 1]:
             self.distribute_messages[edge][i] = (distribution_matrix[0][i] * self.marginals[vertex][i]) / \
-                                                  self.collect_messages[edge][i]
+                                                self.collect_messages[edge][i]
 
     @staticmethod
     def generate_transmission_distribution_matrix(edge: Edge):
@@ -82,7 +86,7 @@ class MessagePassingAlgorithm:
 
     def print_marginals(self):
         for vertex in self.graph.vertices:
-            print("vertex: %s has marginal %s" %(vertex, self.marginals[vertex]))
+            print("vertex: %s has marginal %s" % (vertex, self.marginals[vertex]))
 
 
 class VertexStatus(Enum):
