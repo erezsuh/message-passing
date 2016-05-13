@@ -4,10 +4,12 @@ from Algorithm.MessagePassing import MessagePassingAlgorithm
 
 
 def main():
+    i = 1
     for g in [TransmissionNetwork(0, 1, 1, 0, 0, 1),
               TransmissionNetwork(0, 0, 1, 0, 0, 1),
               TransmissionNetwork(1, 1, 1, 1, 1, 1)]:
-        print("Executing algorithm on %s" % g.graph)
+        print("Executing algorithm on graph %d" % i)
+        i += 1
         for root_index in [0, 1, 5]:
             print("Starting from root %s" % g.graph.vertices[root_index])
             algorithm = MessagePassingAlgorithm(g.graph, g.vertices[root_index])
@@ -15,6 +17,8 @@ def main():
             print("Result:")
             algorithm.print_marginals()
             print("---------------------------------------")
+        print("---------------------------------------")
+        print("---------------------------------------")
 
 
 main()
