@@ -1,6 +1,6 @@
 from TransmissionNetwork.Graph import Graph
 from Tests.GraphGenerator import TransmissionNetwork
-from Algorithm.MessagePassing import MessagePassingAlgorithm
+from Algorithm.MessagePassingAlgorithm import MessagePassingAlgorithm
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
         i += 1
         for root_index in [0, 1, 5]:
             print("Starting from root %s" % g.graph.vertices[root_index])
-            algorithm = MessagePassingAlgorithm(g.graph, g.vertices[root_index])
+            algorithm = MessagePassingAlgorithm(g.graph, g.vertices[root_index], [0.5, 0.5])
             algorithm.compute_marginals()
             print("Result:")
             algorithm.print_result()

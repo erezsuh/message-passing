@@ -7,10 +7,13 @@ from pickle import dump
 
 
 class MessagePassingAlgorithm:
-    def __init__(self, graph: Graph, root: Vertex):
+    def __init__(self, graph: Graph, root: Vertex, root_probability):
         self.graph = graph
         self.root = root
+        self.root_probability = root_probability
+        self.took_care_of_root_probability = False
         self.phi = {vertex: self.compute_phi(vertex) for vertex in self.graph.vertices}
+        self.phi_matrix = {edge: self.compute_phi_matrix(edge) for edge in self.graph.edges}
         self.collect_messages = {edge: [0, 0] for edge in self.graph.edges}
         self.distribute_messages = {edge: [0, 0] for edge in self.graph.edges}
         self.vertex_status = {vertex: VertexStatus.new for vertex in self.graph.vertices}
@@ -43,10 +46,9 @@ class MessagePassingAlgorithm:
         parent_vertex = self.get_vertex_parent(vertex)
         parent_edge = self.graph.get_edge(vertex, parent_vertex)
         result = [0, 0]
-        transmission_matrix = self.generate_transmission_distribution_matrix(parent_edge)
         for i in [0, 1]:
-            result[i] = transmission_matrix[i][0] * self.phi[vertex][0] + \
-                        transmission_matrix[i][1] * self.phi[vertex][1]
+            result[i] = self.phi_matrix[parent_edge][i][0] * self.phi[vertex][0] + \
+                        self.phi_matrix[parent_edge][i][1] * self.phi[vertex][1]
         return result
 
     def distribute(self, vertex: Vertex):
@@ -79,31 +81,35 @@ class MessagePassingAlgorithm:
         return self.graph.is_leaf(vertex) and len(self.get_vertex_children(vertex)) is 0
 
     def calculate_distribute_message(self, vertex: Vertex, edge: Edge):
-        distribution_matrix = self.generate_transmission_distribution_matrix(edge)
         for i in [0, 1]:
-            self.distribute_messages[edge][i] = ((distribution_matrix[0][i] * self.marginals[vertex][0])\
-                                                / self.collect_messages[edge][0]) +\
-                                                ((distribution_matrix[1][i]*self.marginals[vertex][1])\
-                                                /self.collect_messages[edge][1])
+            self.distribute_messages[edge][i] = ((self.phi_matrix[edge][0][i] * self.marginals[vertex][0]) \
+                                                 / self.collect_messages[edge][0]) + \
+                                                ((self.phi_matrix[edge][1][i] * self.marginals[vertex][1]) \
+                                                 / self.collect_messages[edge][1])
 
     @staticmethod
     def generate_transmission_distribution_matrix(edge: Edge):
         return [[1 - edge.flip_probability, edge.flip_probability],
                 [edge.flip_probability, 1 - edge.flip_probability]]
 
+    def compute_phi_matrix(self, edge):
+        if (edge.source is self.root or edge.destination is self.root) and not self.took_care_of_root_probability:
+            self.took_care_of_root_probability = True
+
+            return [[(1 - edge.flip_probability) * self.root_probability[0],
+                     edge.flip_probability * self.root_probability[1]],
+                    [edge.flip_probability * self.root_probability[0],
+                     (1 - edge.flip_probability) * self.root_probability[1]]]
+        else:
+            return self.generate_transmission_distribution_matrix(edge)
+
     def print_result(self):
         for vertex in self.graph.vertices:
             normalized_marginal = [self.marginals[vertex][0] / sum(self.marginals[vertex]),
                                    self.marginals[vertex][1] / sum(self.marginals[vertex])]
             print("P(%s) = %s. (Normalized: %s)" % (vertex, self.marginals[vertex], normalized_marginal))
-        print("P(XA) = %s" % self.compute_total_marginal())
+        print("P(XA) = %s" % sum(self.marginals[self.root]))
 
-    def compute_total_marginal(self):
-        result = 1
-        for vertex in self.graph.vertices:
-            if vertex.observed_value is not None:
-                result *= self.marginals[vertex][0] if vertex.observed_value is 0 else self.marginals[vertex][1]
-        return result
 
 class VertexStatus(Enum):
     new = 1
