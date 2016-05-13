@@ -91,13 +91,19 @@ class MessagePassingAlgorithm:
         return [[1 - edge.flip_probability, edge.flip_probability],
                 [edge.flip_probability, 1 - edge.flip_probability]]
 
-    def print_marginals(self):
+    def print_result(self):
         for vertex in self.graph.vertices:
             normalized_marginal = [self.marginals[vertex][0] / sum(self.marginals[vertex]),
                                    self.marginals[vertex][1] / sum(self.marginals[vertex])]
             print("P(%s) = %s. (Normalized: %s)" % (vertex, self.marginals[vertex], normalized_marginal))
+        print("P(XA) = %s" % self.compute_total_marginal())
 
-
+    def compute_total_marginal(self):
+        result = 1
+        for vertex in self.graph.vertices:
+            if vertex.observed_value is not None:
+                result *= self.marginals[vertex][0] if vertex.observed_value is 0 else self.marginals[vertex][1]
+        return result
 
 class VertexStatus(Enum):
     new = 1

@@ -15,7 +15,7 @@ def main():
             algorithm = MessagePassingAlgorithm(g.graph, g.vertices[root_index])
             algorithm.compute_marginals()
             print("Result:")
-            algorithm.print_marginals()
+            algorithm.print_result()
             print("---------------------------------------")
         print("---------------------------------------")
         print("---------------------------------------")
