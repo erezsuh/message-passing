@@ -10,11 +10,15 @@ class MessagePassingAlgorithm:
     def __init__(self, graph: Graph, root: Vertex):
         self.graph = graph
         self.root = root
-        self.phi = {vertex: [1, 1] for vertex in self.graph.vertices}
+        self.phi = {vertex: self.compute_phi(vertex) for vertex in self.graph.vertices}
         self.collect_messages = {edge: [0, 0] for edge in self.graph.edges}
         self.distribute_messages = {edge: [0, 0] for edge in self.graph.edges}
         self.vertex_status = {vertex: VertexStatus.new for vertex in self.graph.vertices}
         self.marginals = {vertex: [1, 1] for vertex in self.graph.vertices}
+
+    @staticmethod
+    def compute_phi(vertex: Vertex):
+        return [1, 1] if vertex.observed_value is None else ([1, 0] if vertex.observed_value is 0 else [0, 1])
 
     def compute_marginals(self):
         self.collect(self.root)
@@ -23,9 +27,7 @@ class MessagePassingAlgorithm:
 
     def collect(self, vertex: Vertex) -> float:
         self.vertex_status[vertex] = VertexStatus.in_progress
-        if self.graph.is_leaf(vertex):
-            self.phi[vertex] = [1, 0] if vertex.observed_value is 0 else [0, 1]
-        else:
+        if not self.is_vertex_leaf(vertex):
             for child_vertex in self.get_vertex_children(vertex):
                 child_edge = self.graph.get_edge(child_vertex, vertex)
                 self.collect_messages[child_edge] = self.collect(child_vertex)
@@ -54,9 +56,9 @@ class MessagePassingAlgorithm:
         else:
             vertex_parent = self.get_vertex_parent(vertex)
             edge_parent = self.graph.get_edge(vertex, vertex_parent)
-            self.marginals[vertex] = VectorUtils.multiply_vectors(self.phi[vertex],
-                                                                  self.collect_messages[edge_parent])
-        if not self.graph.is_leaf(vertex):
+            for i in [0, 1]:
+                self.marginals[vertex][i] = self.phi[vertex][i] * self.distribute_messages[edge_parent][i]
+        if not self.is_vertex_leaf(vertex):
             for child_vertex in self.get_vertex_children(vertex):
                 child_edge = self.graph.get_edge(child_vertex, vertex)
                 self.calculate_distribute_message(vertex, child_edge)
@@ -73,11 +75,16 @@ class MessagePassingAlgorithm:
             if self.vertex_status[neighbour] is VertexStatus.in_progress:
                 return neighbour
 
+    def is_vertex_leaf(self, vertex: Vertex):
+        return self.graph.is_leaf(vertex) and len(self.get_vertex_children(vertex)) is 0
+
     def calculate_distribute_message(self, vertex: Vertex, edge: Edge):
         distribution_matrix = self.generate_transmission_distribution_matrix(edge)
         for i in [0, 1]:
-            self.distribute_messages[edge][i] = (distribution_matrix[0][i] * self.marginals[vertex][i]) / \
-                                                self.collect_messages[edge][i]
+            self.distribute_messages[edge][i] = ((distribution_matrix[0][i] * self.marginals[vertex][0])\
+                                                / self.collect_messages[edge][0]) +\
+                                                ((distribution_matrix[1][i]*self.marginals[vertex][1])\
+                                                /self.collect_messages[edge][1])
 
     @staticmethod
     def generate_transmission_distribution_matrix(edge: Edge):
