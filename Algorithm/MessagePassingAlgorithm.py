@@ -107,9 +107,10 @@ class MessagePassingAlgorithm:
 
     def print_result(self):
         for vertex in self.graph.vertices:
-            normalized_marginal = [self.marginals[vertex][0] / sum(self.marginals[vertex]),
-                                   self.marginals[vertex][1] / sum(self.marginals[vertex])]
-            print("P(%s) = %s. (Normalized: %s)" % (vertex, self.marginals[vertex], normalized_marginal))
+            if vertex.observed_value is None:
+                normalized_marginal = [self.marginals[vertex][0] / sum(self.marginals[vertex]),
+                                       self.marginals[vertex][1] / sum(self.marginals[vertex])]
+                print("P(%s) = %s. (Normalized: %s)" % (vertex, self.marginals[vertex], normalized_marginal))
         print("P(XA) = %s" % sum(self.marginals[self.root]))
 
 
