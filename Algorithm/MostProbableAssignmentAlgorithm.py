@@ -1,8 +1,9 @@
 from TransmissionNetwork.Graph import Graph
 from TransmissionNetwork.Vertex import Vertex
 from TransmissionNetwork.Edge import Edge
-from Utils import VectorUtils
+from Utils import VectorUtils, MaxUtils
 from enum import Enum
+
 
 class MostProbableAssignmentAlgorithm:
     def __init__(self, graph: Graph, root: Vertex, root_probability):
@@ -13,11 +14,9 @@ class MostProbableAssignmentAlgorithm:
         self.phi = {vertex: self.compute_phi(vertex) for vertex in self.graph.vertices}
         self.phi_matrix = {edge: self.compute_phi_matrix(edge) for edge in self.graph.edges}
         self.collect_messages = {edge: [0, 0] for edge in self.graph.edges}
-        self.distribute_messages = {edge: [0, 0] for edge in self.graph.edges}
         self.vertex_status = {vertex: VertexStatus.new for vertex in self.graph.vertices}
-        self.marginals = {vertex: [1, 1] for vertex in self.graph.vertices}
         self.argmax = {edge: [0, 0] for edge in self.graph.edges}
-
+        self.most_probable_assignment = {vertex: [0, 0] for vertex in self.graph.vertices}
 
     @staticmethod
     def compute_phi(vertex: Vertex):
@@ -33,7 +32,7 @@ class MostProbableAssignmentAlgorithm:
         if not self.is_vertex_leaf(vertex):
             for child_vertex in self.get_vertex_children(vertex):
                 child_edge = self.graph.get_edge(child_vertex, vertex)
-                [self.collect_messages[child_edge], self.argmax[child_edge]] = self.collect(child_vertex)
+                self.argmax[child_edge], self.collect_messages[child_edge] = self.collect(child_vertex)
                 self.phi[vertex] = VectorUtils.multiply_vectors(self.phi[vertex],
                                                                 self.collect_messages[child_edge])
         self.vertex_status[vertex] = VertexStatus.finished
@@ -48,26 +47,22 @@ class MostProbableAssignmentAlgorithm:
         collect_message = [0, 0]
         argmax = [0, 0]
         for i in [0, 1]:
-            if self.phi_matrix[parent_edge][i][0] >= self.phi_matrix[parent_edge][i][1]:
-                argmax[i] = 0
-            else:
-                argmax[i] = 1
-            collect_message[i] = self.phi_matrix[i][argmax[i]]
-        return [collect_message, argmax]
+            argmax[i], collect_message[i] = MaxUtils.argmax(VectorUtils.multiply_vectors(
+                self.phi_matrix[parent_edge][i], self.phi[vertex]))
+        return argmax, collect_message
 
     def distribute(self, vertex: Vertex):
         self.vertex_status[vertex] = VertexStatus.in_progress
         if vertex is self.root:
-            self.marginals[vertex] = self.phi[vertex]
+            self.most_probable_assignment[vertex] = list(MaxUtils.argmax(self.phi[vertex]))
         else:
             vertex_parent = self.get_vertex_parent(vertex)
             edge_parent = self.graph.get_edge(vertex, vertex_parent)
-            for i in [0, 1]:
-                self.marginals[vertex][i] = self.phi[vertex][i] * self.distribute_messages[edge_parent][i]
+            most_probable_parent_value = self.most_probable_assignment[vertex_parent][0]
+            self.most_probable_assignment[vertex] = [self.argmax[edge_parent][most_probable_parent_value],
+                                                     self.collect_messages[edge_parent][most_probable_parent_value]]
         if not self.is_vertex_leaf(vertex):
             for child_vertex in self.get_vertex_children(vertex):
-                child_edge = self.graph.get_edge(child_vertex, vertex)
-                self.calculate_distribute_message(vertex, child_edge)
                 self.distribute(child_vertex)
         self.vertex_status[vertex] = VertexStatus.finished
 
@@ -83,13 +78,6 @@ class MostProbableAssignmentAlgorithm:
 
     def is_vertex_leaf(self, vertex: Vertex):
         return self.graph.is_leaf(vertex) and len(self.get_vertex_children(vertex)) is 0
-
-    def calculate_distribute_message(self, vertex: Vertex, edge: Edge):
-        for i in [0, 1]:
-            self.distribute_messages[edge][i] = ((self.phi_matrix[edge][0][i] * self.marginals[vertex][0]) \
-                                                 / self.collect_messages[edge][0]) + \
-                                                ((self.phi_matrix[edge][1][i] * self.marginals[vertex][1]) \
-                                                 / self.collect_messages[edge][1])
 
     @staticmethod
     def generate_transmission_distribution_matrix(edge: Edge):
@@ -109,14 +97,12 @@ class MostProbableAssignmentAlgorithm:
 
     def print_result(self):
         for vertex in self.graph.vertices:
-            normalized_marginal = [self.marginals[vertex][0] / sum(self.marginals[vertex]),
-                                   self.marginals[vertex][1] / sum(self.marginals[vertex])]
-            print("P(%s) = %s. (Normalized: %s)" % (vertex, self.marginals[vertex], normalized_marginal))
-        print("P(XA) = %s" % sum(self.marginals[self.root]))
+            if vertex.observed_value is None:
+                print("Max(P({0})) = {1}. P({0}={1}) = {2}".format(vertex, self.most_probable_assignment[vertex][0],
+                                                                   self.most_probable_assignment[vertex][1]))
 
 
 class VertexStatus(Enum):
     new = 1
     in_progress = 2
     finished = 3
-

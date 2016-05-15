@@ -1,9 +1,9 @@
+from enum import Enum
+
 from TransmissionNetwork.Graph import Graph
 from TransmissionNetwork.Vertex import Vertex
 from TransmissionNetwork.Edge import Edge
 from Utils import VectorUtils
-from enum import Enum
-from pickle import dump
 
 
 class MessagePassingAlgorithm:
@@ -64,6 +64,7 @@ class MessagePassingAlgorithm:
             for child_vertex in self.get_vertex_children(vertex):
                 child_edge = self.graph.get_edge(child_vertex, vertex)
                 self.calculate_distribute_message(vertex, child_edge)
+                # recursion on children
                 self.distribute(child_vertex)
         self.vertex_status[vertex] = VertexStatus.finished
 
@@ -80,6 +81,7 @@ class MessagePassingAlgorithm:
     def is_vertex_leaf(self, vertex: Vertex):
         return self.graph.is_leaf(vertex) and len(self.get_vertex_children(vertex)) is 0
 
+    # sum of multiplication between the phi and the marginal of father
     def calculate_distribute_message(self, vertex: Vertex, edge: Edge):
         for i in [0, 1]:
             self.distribute_messages[edge][i] = ((self.phi_matrix[edge][0][i] * self.marginals[vertex][0]) \
@@ -93,9 +95,9 @@ class MessagePassingAlgorithm:
                 [edge.flip_probability, 1 - edge.flip_probability]]
 
     def compute_phi_matrix(self, edge):
+        # for one of the edges that interacts with the root, multiply by root probability
         if (edge.source is self.root or edge.destination is self.root) and not self.took_care_of_root_probability:
             self.took_care_of_root_probability = True
-
             return [[(1 - edge.flip_probability) * self.root_probability[0],
                      edge.flip_probability * self.root_probability[1]],
                     [edge.flip_probability * self.root_probability[0],
