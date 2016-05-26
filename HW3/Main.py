@@ -1,7 +1,9 @@
-from TransmissionNetwork.Graph import Graph
-from Tests.GraphGenerator import TransmissionNetwork
-from Algorithm.MessagePassingAlgorithm import MessagePassingAlgorithm
-from Algorithm.MostProbableAssignmentAlgorithm import MostProbableAssignmentAlgorithm
+# Benjamin Tebeka
+# Erez Suharenko
+
+from HW3.Tests import TransmissionNetwork
+from HW3.Algorithm import MessagePassingAlgorithm
+from HW3.Algorithm import MostProbableAssignmentAlgorithm
 
 def main():
     i = 1

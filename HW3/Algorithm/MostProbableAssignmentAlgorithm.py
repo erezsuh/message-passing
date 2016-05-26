@@ -1,8 +1,9 @@
+from enum import Enum
+
 from TransmissionNetwork.Graph import Graph
 from TransmissionNetwork.Vertex import Vertex
 from TransmissionNetwork.Edge import Edge
-from Utils import VectorUtils, MaxUtils
-from enum import Enum
+from HW3.Utils import VectorUtils, MaxUtils
 
 
 class MostProbableAssignmentAlgorithm:
@@ -100,7 +101,7 @@ class MostProbableAssignmentAlgorithm:
             if vertex.observed_value is None:
                 print("Max(P({0})) = {1}. P({0}={1}) = {2}".format(vertex, self.most_probable_assignment[vertex][0],
                                                                    self.most_probable_assignment[vertex][1]))
-
+        print("P(X) = %s" % self.most_probable_assignment[Vertex("X1")][1])
 
 class VertexStatus(Enum):
     new = 1

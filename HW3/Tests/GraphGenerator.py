@@ -1,6 +1,6 @@
-from TransmissionNetwork.Vertex import Vertex
-from TransmissionNetwork.Edge import Edge
-from TransmissionNetwork.Graph import Graph
+from HW3.TransmissionNetwork import Vertex
+from HW3.TransmissionNetwork import Edge
+from HW3.TransmissionNetwork import Graph
 
 
 class TransmissionNetwork:

@@ -3,7 +3,7 @@ from enum import Enum
 from TransmissionNetwork.Graph import Graph
 from TransmissionNetwork.Vertex import Vertex
 from TransmissionNetwork.Edge import Edge
-from Utils import VectorUtils
+from HW3.Utils import VectorUtils
 
 
 class MessagePassingAlgorithm:

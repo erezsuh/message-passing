@@ -1,4 +1,4 @@
-from TransmissionNetwork.Vertex import Vertex
+from HW3.TransmissionNetwork import Vertex
 
 
 class Edge:
