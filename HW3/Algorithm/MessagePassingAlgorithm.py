@@ -1,8 +1,8 @@
 from enum import Enum
 
-from TransmissionNetwork.Graph import Graph
-from TransmissionNetwork.Vertex import Vertex
-from TransmissionNetwork.Edge import Edge
+from HW3.TransmissionNetwork.Graph import Graph
+from HW3.TransmissionNetwork.Vertex import Vertex
+from HW3.TransmissionNetwork.Edge import Edge
 from HW3.Utils import VectorUtils
 
 
