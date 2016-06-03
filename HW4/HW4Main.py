@@ -15,7 +15,7 @@ if option is 'C':
     algorithm.generate_sufficient_statistics()
     algorithm.normalize_sufficient_statistics()
 elif option is 'M':
-    initial_parameters = [0.2] * len(graph.vertices)
+    initial_parameters = [0.5] * len(graph.vertices)
     algorithm = MaximumProbabilityInferenceAlgorithm(graph, graph.vertices[0],
                                                      parser.data, parser.variables)
     algorithm.start(initial_parameters)

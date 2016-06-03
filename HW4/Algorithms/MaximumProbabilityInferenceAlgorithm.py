@@ -4,6 +4,8 @@ from HW4.GraphTraversal.GraphTraversal import GraphTraversal
 from HW4.Algorithms.CompleteInferringAlgorithm import CompleteInferringAlgorithm
 
 from HW3.Algorithm.MostProbableAssignmentAlgorithm import MostProbableAssignmentAlgorithm
+
+
 class MaximumProbabilityInferenceAlgorithm:
     def __init__(self, graph: Graph, root: Vertex, data, observed_variables):
         self.graph = graph
@@ -15,13 +17,23 @@ class MaximumProbabilityInferenceAlgorithm:
         self.observed_variables = observed_variables
         self.hidden_variables = [vertex.name for
                                  vertex in self.graph.vertices if vertex.name not in self.observed_variables]
-
+        self.x1 = self.graph.get_vertex_by_id(0)
+        self.x2 = self.graph.get_vertex_by_id(1)
+        self.x3 = self.graph.get_vertex_by_id(2)
+        self.x4 = self.graph.get_vertex_by_id(3)
+        self.x5 = self.graph.get_vertex_by_id(4)
+        self.x6 = self.graph.get_vertex_by_id(5)
+        self.x7 = self.graph.get_vertex_by_id(6)
+        self.x8 = self.graph.get_vertex_by_id(7)
+        self.x9 = self.graph.get_vertex_by_id(8)
+        self.x10 = self.graph.get_vertex_by_id(9)
 
     def start(self, initial_parameters):
         current_parameters = initial_parameters
         while True:
             data = []
             self.update_graph_parameters(current_parameters)
+            self.print_graph_parameters()
             for data_instance in self.data:
                 self.update_graph_observed_variables(data_instance)
                 mp_algorithm = MostProbableAssignmentAlgorithm(self.graph, self.graph.vertices[0], [0.5, 0.5])
@@ -32,8 +44,9 @@ class MaximumProbabilityInferenceAlgorithm:
             ci_algorithm = CompleteInferringAlgorithm(self.graph, self.root, data)
             ci_algorithm.generate_sufficient_statistics()
             ci_algorithm.normalize_sufficient_statistics()
-            current_parameters = ci_algorithm.mle
-
+            current_parameters = []
+            for edge in self.get_ordered_edges():
+                current_parameters.append(ci_algorithm.mle[edge][1])
 
 
     def update_graph_observed_variables(self, data):
@@ -41,32 +54,25 @@ class MaximumProbabilityInferenceAlgorithm:
             vertex = self.graph.get_vertex_by_name(observed_variable)
             vertex.observed_value = int(data[index])
 
-
     def update_graph_hidden_variables(self, most_probable_assignment):
         for hidden_variable in self.hidden_variables:
             vertex = self.graph.get_vertex_by_name(hidden_variable)
             vertex.observed_value = int(most_probable_assignment[vertex][0])
 
     def update_graph_parameters(self, parameters):
-        x1 = self.graph.get_vertex_by_id(0)
-        x2 = self.graph.get_vertex_by_id(1)
-        x3 = self.graph.get_vertex_by_id(2)
-        x4 = self.graph.get_vertex_by_id(3)
-        x5 = self.graph.get_vertex_by_id(4)
-        x6 = self.graph.get_vertex_by_id(5)
-        x7 = self.graph.get_vertex_by_id(6)
-        x8 = self.graph.get_vertex_by_id(7)
-        x9 = self.graph.get_vertex_by_id(8)
-        x10 = self.graph.get_vertex_by_id(9)
+        for i, edge in enumerate(self.get_ordered_edges()):
+            edge.flip_probability = parameters[i]
 
-        self.graph.get_edge(x1, x2).flip_probability = parameters[0]
-        self.graph.get_edge(x2, x3).flip_probability = parameters[1]
-        self.graph.get_edge(x2, x4).flip_probability = parameters[2]
-        self.graph.get_edge(x1, x5).flip_probability = parameters[3]
-        self.graph.get_edge(x5, x6).flip_probability = parameters[4]
-        self.graph.get_edge(x5, x7).flip_probability = parameters[5]
-        self.graph.get_edge(x1, x8).flip_probability = parameters[6]
-        self.graph.get_edge(x8, x9).flip_probability = parameters[7]
-        self.graph.get_edge(x8, x10).flip_probability = parameters[8]
+    def get_ordered_edges(self):
+        return [self.graph.get_edge(self.x1, self.x2),
+                self.graph.get_edge(self.x2, self.x3),
+                self.graph.get_edge(self.x2, self.x4),
+                self.graph.get_edge(self.x1, self.x5),
+                self.graph.get_edge(self.x5, self.x6),
+                self.graph.get_edge(self.x5, self.x7),
+                self.graph.get_edge(self.x1, self.x8),
+                self.graph.get_edge(self.x8, self.x9),
+                self.graph.get_edge(self.x8, self.x10)]
 
-
+    def print_graph_parameters(self):
+        print('\t'.join([str(edge.flip_probability) for edge in self.get_ordered_edges()]))
