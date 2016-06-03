@@ -27,3 +27,12 @@ class Graph:
             if e.contains(v1) and e.contains(v2):
                 return e
 
+    def get_vertex_by_id(self, id: int):
+        for vertex in self.vertices:
+            if vertex.id is id:
+                return vertex
+
+    def get_vertex_by_name(self, name: str):
+        for vertex in self.vertices:
+            if vertex.name == name:
+                return vertex

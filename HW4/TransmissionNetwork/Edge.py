@@ -5,6 +5,7 @@ class Edge:
     def __init__(self, source: Vertex, destination: Vertex):
         self.source = source
         self.destination = destination
+        self.flip_probability = None
 
     def contains(self, vertex: Vertex):
         return self.source == vertex or self.destination == vertex

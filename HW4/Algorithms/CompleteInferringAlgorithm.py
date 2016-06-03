@@ -9,7 +9,6 @@ class CompleteInferringAlgorithm:
         self.root = root
         self.sufficient_statistics = {edge: [0, 0] for edge in self.graph.edges}
         self.mle = {edge: [0, 0] for edge in self.graph.edges}
-        self.model_parameters = {edge: 0 for edge in self.graph.edges}
         self.graphTraversal = GraphTraversal(graph, root)
         self.graphTraversal.traverse(None)
 
