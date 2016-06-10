@@ -35,6 +35,7 @@ class MaximumProbabilityInferenceAlgorithm:
             self.update_graph_parameters(current_parameters)
             self.print_graph_parameters()
             for data_instance in self.data:
+                self.reset_hidden_variables()
                 self.update_graph_observed_variables(data_instance)
                 mp_algorithm = MostProbableAssignmentAlgorithm(self.graph, self.graph.vertices[0], [0.5, 0.5])
                 mp_algorithm.compute_most_probable_assignment()
@@ -48,7 +49,6 @@ class MaximumProbabilityInferenceAlgorithm:
             for edge in self.get_ordered_edges():
                 current_parameters.append(ci_algorithm.mle[edge][1])
 
-
     def update_graph_observed_variables(self, data):
         for index, observed_variable in enumerate(self.observed_variables):
             vertex = self.graph.get_vertex_by_name(observed_variable)
@@ -58,6 +58,11 @@ class MaximumProbabilityInferenceAlgorithm:
         for hidden_variable in self.hidden_variables:
             vertex = self.graph.get_vertex_by_name(hidden_variable)
             vertex.observed_value = int(most_probable_assignment[vertex][0])
+
+    def reset_hidden_variables(self):
+        for hidden_variable in self.hidden_variables:
+            vertex = self.graph.get_vertex_by_name(hidden_variable)
+            vertex.observed_value = None
 
     def update_graph_parameters(self, parameters):
         for i, edge in enumerate(self.get_ordered_edges()):
