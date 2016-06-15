@@ -1,22 +1,17 @@
+from decimal import *
+
 from HW4.TransmissionNetwork.Graph import Graph
 from HW4.TransmissionNetwork.Vertex import Vertex
 from HW4.GraphTraversal.GraphTraversal import GraphTraversal
 from HW4.Algorithms.CompleteInferringAlgorithm import CompleteInferringAlgorithm
-
 from HW3.Algorithm.MostProbableAssignmentAlgorithm import MostProbableAssignmentAlgorithm
-from HW3.Algorithm.MessagePassingAlgorithm import MessagePassingAlgorithm
 
-from decimal import *
-from copy import deepcopy
 
 class MaximumProbabilityInferenceAlgorithm:
     def __init__(self, graph: Graph, root: Vertex, data, observed_variables):
         self.graph = graph
         self.data = data
         self.root = root
-        self.model_parameters = {edge: 0 for edge in self.graph.edges}
-        self.graphTraversal = GraphTraversal(graph, root)
-        self.graphTraversal.traverse(None)
         self.observed_variables = observed_variables
         self.hidden_variables = [vertex.name for
                                  vertex in self.graph.vertices if vertex.name not in self.observed_variables]

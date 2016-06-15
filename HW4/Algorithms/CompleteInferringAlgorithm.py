@@ -2,6 +2,8 @@ from HW4.TransmissionNetwork.Graph import Graph
 from HW4.TransmissionNetwork.Vertex import Vertex
 from HW4.GraphTraversal.GraphTraversal import GraphTraversal
 from decimal import *
+
+
 class CompleteInferringAlgorithm:
     def __init__(self, graph: Graph, root: Vertex, data):
         self.graph = graph
@@ -57,3 +59,12 @@ class CompleteInferringAlgorithm:
             else:
                 data_instance_likelihood *= edge.flip_probability
         return data_instance_likelihood
+    #
+    # def calculate_likelihood(self):
+    #     getcontext().prec = 1000
+    #     likelihood = Decimal(1)
+    #     for edge in self.sufficient_statistics:
+    #         statistic = self.sufficient_statistics[edge]
+    #         likelihood *= Decimal(Decimal(1 - edge.flip_probability) ** Decimal(statistic[0]))
+    #         likelihood *= Decimal(Decimal(edge.flip_probability) ** Decimal(statistic[1]))
+    #     return float(likelihood.ln())
