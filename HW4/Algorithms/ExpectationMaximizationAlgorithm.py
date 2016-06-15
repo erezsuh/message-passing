@@ -1,9 +1,10 @@
 from HW4.TransmissionNetwork.Graph import Graph
 from HW4.TransmissionNetwork.Vertex import Vertex
 from HW4.GraphTraversal.GraphTraversal import GraphTraversal
-from HW4.Algorithms.CompleteInferringAlgorithm import CompleteInferringAlgorithm
+
 
 from HW3.Algorithm.MessagePassingAlgorithm import MessagePassingAlgorithm
+from HW3.Algorithm.MostProbableAssignmentAlgorithm import MostProbableAssignmentAlgorithm
 
 from decimal import *
 
@@ -32,16 +33,21 @@ class ExpectationMaximizationAlgorithm:
 
     def start(self, initial_parameters):
         current_parameters = initial_parameters
-        previous_data_instance_log_likelihood = 0
+        previous_log_prob = 0
         while True:
             s = ""
             self.update_graph_parameters(current_parameters)
             expected_sufficient_statistics = []
+            probability = Decimal(1)
+            likelihood = Decimal(1)
             for data_instance in self.data:
                 self.update_graph_observed_variables(data_instance)
+                mpa_algorithm = MostProbableAssignmentAlgorithm(self.graph, self.root, [0.5, 0.5])
+                mpa_algorithm.compute_most_probable_assignment()
+                probability *= Decimal(mpa_algorithm.get_likelihood())
                 mp_algorithm = MessagePassingAlgorithm(self.graph, self.graph.vertices[0], [0.5, 0.5])
                 mp_algorithm.compute_marginals()
-
+                likelihood *= Decimal(mp_algorithm.get_likelihood())
                 expected_sufficient_statistic = {vertex: [[0, 0], [0, 0]] for vertex in self.graph.vertices}
                 for vertex in self.graph.vertices:
                     if vertex is self.root:
@@ -63,6 +69,17 @@ class ExpectationMaximizationAlgorithm:
                     for k in [0, 1]:
                         for l in [0, 1]:
                             sum_statistics[vertex][k][l] += expected_sufficient_statistic[vertex][k][l]
+
+            current_log_pob = probability.ln()
+            s += '\t'.join(["{0:.3f}".format(param) for param in current_parameters])
+            s += '\t%s' % float(current_log_pob)
+            s += '\t%s' % float(likelihood.ln())
+            print(s)
+
+            if abs(current_log_pob - previous_log_prob) < 0.001:
+                break
+            previous_log_prob = current_log_pob
+
             current_parameters = []
             for edge in self.get_ordered_edges():
                 if edge.source is self.root:
@@ -74,10 +91,7 @@ class ExpectationMaximizationAlgorithm:
                 row_sum = sum(sum_statistics[vertex][0]) + sum(sum_statistics[vertex][1])
                 current_parameters.append((sum_statistics[vertex][0][1] + sum_statistics[vertex][1][0]) / row_sum)
 
-            s += '\t'.join([str(param) for param in current_parameters])
-            # s += '\t\t%s' % current_data_instance_log_likelihood
-            # s += '\t%s' % float(likelihood.ln())
-            print(s)
+
             # if abs(current_data_instance_log_likelihood - previous_data_instance_log_likelihood) < 0.001:
             #     break
             # previous_data_instance_log_likelihood = current_data_instance_log_likelihood
@@ -102,24 +116,3 @@ class ExpectationMaximizationAlgorithm:
                 self.graph.get_edge(self.x1, self.x8),
                 self.graph.get_edge(self.x8, self.x9),
                 self.graph.get_edge(self.x8, self.x10)]
-
-    def calculate_log_likelihood(self):
-        likelihood = Decimal(1)
-        for data_instance in self.data:
-            likelihood *= Decimal(self.calculate_data_instance_likelihood(data_instance))
-            # print(likelihood)
-            # print(likelihood.ln())
-        return float(likelihood.ln())
-
-    def calculate_data_instance_likelihood(self, data_instance):
-        data_instance_likelihood = 0.5
-        for vertex in self.graph.vertices:
-            if vertex is self.root:
-                continue
-            parent = self.graphTraversal.parents[vertex]
-            edge = self.graph.get_edge(parent, vertex)
-            if self.get_data_for_vertex(data_instance, vertex) == self.get_data_for_vertex(data_instance, parent):
-                data_instance_likelihood *= 1 - edge.flip_probability
-            else:
-                data_instance_likelihood *= edge.flip_probability
-        return data_instance_likelihood

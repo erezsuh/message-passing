@@ -68,3 +68,6 @@ class CompleteInferringAlgorithm:
     #         likelihood *= Decimal(Decimal(1 - edge.flip_probability) ** Decimal(statistic[0]))
     #         likelihood *= Decimal(Decimal(edge.flip_probability) ** Decimal(statistic[1]))
     #     return float(likelihood.ln())
+
+    def print(self):
+        pass

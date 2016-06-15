@@ -103,6 +103,10 @@ class MostProbableAssignmentAlgorithm:
                                                                    self.most_probable_assignment[vertex][1]))
         print("P(X) = %s" % self.most_probable_assignment[Vertex("X1")][1])
 
+    def get_likelihood(self):
+        return self.most_probable_assignment[self.root][1]
+
+
 class VertexStatus(Enum):
     new = 1
     in_progress = 2
