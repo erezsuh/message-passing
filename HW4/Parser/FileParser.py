@@ -1,11 +1,9 @@
-from os.path import join, isfile
+from os.path import isfile
 
 
 class FileParser:
-    def __init__(self, file_name):
-        self.base_dir = 'e:\Projects\IDC\ProbabilisticModels\HW4\ex4-data'
-        self.file_name = file_name
-        self.file_path = join(self.base_dir, file_name)
+    def __init__(self, file_path):
+        self.file_path = file_path
         if not isfile(self.file_path):
             raise Exception("File not existing")
         self.raw_data = None
