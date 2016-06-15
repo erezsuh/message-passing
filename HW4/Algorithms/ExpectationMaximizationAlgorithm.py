@@ -9,7 +9,7 @@ from HW3.Algorithm.MessagePassingAlgorithm import MessagePassingAlgorithm
 from decimal import *
 from copy import deepcopy
 
-class MaximumProbabilityInferenceAlgorithm:
+class ExpectationMaximizationAlgorithm:
     def __init__(self, graph: Graph, root: Vertex, data, observed_variables):
         self.graph = graph
         self.data = data
@@ -34,19 +34,16 @@ class MaximumProbabilityInferenceAlgorithm:
     def start(self, initial_parameters):
         current_parameters = initial_parameters
         previous_data_instance_log_likelihood = 0
-        getcontext().prec = 1000
         while True:
             complete_data = []
             s = ""
             self.update_graph_parameters(current_parameters)
-            likelihood = Decimal(1)
             for data_instance in self.data:
                 self.reset_hidden_variables()
                 self.update_graph_observed_variables(data_instance)
                 mp_algorithm = MostProbableAssignmentAlgorithm(self.graph, self.graph.vertices[0], [0.5, 0.5])
                 mp_algorithm.compute_most_probable_assignment()
                 self.update_graph_hidden_variables(mp_algorithm.most_probable_assignment)
-                likelihood *= Decimal(mp_algorithm.most_probable_assignment[mp_algorithm.root][1])
                 complete_data.append([vertex.observed_value for vertex in self.graph.vertices])
 
             ci_algorithm = CompleteInferringAlgorithm(self.graph, self.root, complete_data)
@@ -54,7 +51,7 @@ class MaximumProbabilityInferenceAlgorithm:
             current_data_instance_log_likelihood = ci_algorithm.calculate_log_likelihood()
             s += '\t'.join([str(edge.flip_probability) for edge in self.get_ordered_edges()])
             s += '\t\t%s' % current_data_instance_log_likelihood
-            s += '\t%s' % float(likelihood.ln())
+            s += '\t%s' % self.calculate_log_likelihood()
             print(s)
             if abs(current_data_instance_log_likelihood - previous_data_instance_log_likelihood) < 0.001:
                 break
@@ -95,6 +92,7 @@ class MaximumProbabilityInferenceAlgorithm:
                 self.graph.get_edge(self.x8, self.x10)]
 
     def calculate_log_likelihood(self):
+        getcontext().prec = 1000
         likelihood = Decimal(1)
         for data_instance in self.data:
             likelihood *= Decimal(self.calculate_data_instance_likelihood(data_instance))
