@@ -113,7 +113,8 @@ class MessagePassingAlgorithm:
                 print("P(%s) = %s. (Normalized: %s)" % (vertex, self.marginals[vertex], normalized_marginal))
         print("P(XA) = %s" % sum(self.marginals[self.root]))
 
-
+    def get_likelihood(self):
+        return sum(self.marginals[self.root])
 class VertexStatus(Enum):
     new = 1
     in_progress = 2

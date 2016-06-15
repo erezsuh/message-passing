@@ -3,6 +3,7 @@ from HW4.Parser.FileParser import FileParser
 from HW4.Tests.GraphGenerator import TransmissionNetwork
 from HW4.Algorithms.CompleteInferringAlgorithm import CompleteInferringAlgorithm
 from HW4.Algorithms.MaximumProbabilityInferenceAlgorithm import MaximumProbabilityInferenceAlgorithm
+from HW4.Algorithms.ExpectationMaximizationAlgorithm import ExpectationMaximizationAlgorithm
 
 if len(argv) != 3:
     raise Exception("Invalid args")
@@ -13,12 +14,18 @@ graph = TransmissionNetwork().graph
 if option is 'C':
     algorithm = CompleteInferringAlgorithm(graph, graph.vertices[0], parser.data)
     algorithm.generate_sufficient_statistics()
-    algorithm.normalize_sufficient_statistics()
+    algorithm.update_graph_flip_probabilities()
+    # print("liklihood is : %s" % algorithm.calculate_likelihood())
+
 elif option is 'M':
     initial_parameters = [0.5] * len(graph.vertices)
     algorithm = MaximumProbabilityInferenceAlgorithm(graph, graph.vertices[0],
                                                      parser.data, parser.variables)
     algorithm.start(initial_parameters)
+elif option is 'E':
+    initial_parameters = [0.5] * len(graph.vertices)
+    algorithm = ExpectationMaximizationAlgorithm(graph, graph.vertices[0],
+                                                     parser.data, parser.variables)
+    algorithm.start(initial_parameters)
 
-
-    print("bla")
+print("finished")
