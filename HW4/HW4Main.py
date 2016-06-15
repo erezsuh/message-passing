@@ -15,7 +15,6 @@ if option is 'C':
     algorithm = CompleteInferringAlgorithm(graph, graph.vertices[0], parser.data)
     algorithm.generate_sufficient_statistics()
     algorithm.update_graph_flip_probabilities()
-    # print("liklihood is : %s" % algorithm.calculate_likelihood())
 
 elif option is 'M':
     initial_parameters = [0.5] * len(graph.vertices)
@@ -23,7 +22,7 @@ elif option is 'M':
                                                      parser.data, parser.variables)
     algorithm.start(initial_parameters)
 elif option is 'E':
-    initial_parameters = [0.5] * len(graph.vertices)
+    initial_parameters = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.4, 0.4, 0.4 ]
     algorithm = ExpectationMaximizationAlgorithm(graph, graph.vertices[0],
                                                      parser.data, parser.variables)
     algorithm.start(initial_parameters)

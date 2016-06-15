@@ -2,7 +2,6 @@ from decimal import *
 
 from HW4.TransmissionNetwork.Graph import Graph
 from HW4.TransmissionNetwork.Vertex import Vertex
-from HW4.GraphTraversal.GraphTraversal import GraphTraversal
 from HW4.Algorithms.CompleteInferringAlgorithm import CompleteInferringAlgorithm
 from HW3.Algorithm.MostProbableAssignmentAlgorithm import MostProbableAssignmentAlgorithm
 
