@@ -93,30 +93,3 @@ class MaximumProbabilityInferenceAlgorithm:
                 self.graph.get_edge(self.x1, self.x8),
                 self.graph.get_edge(self.x8, self.x9),
                 self.graph.get_edge(self.x8, self.x10)]
-
-    def calculate_log_likelihood(self):
-        likelihood = Decimal(1)
-        for data_instance in self.data:
-            likelihood *= Decimal(self.calculate_data_instance_likelihood(data_instance))
-            # print(likelihood)
-            # print(likelihood.ln())
-        return float(likelihood.ln())
-
-    def calculate_data_instance_likelihood(self, data_instance):
-        graph_copy = deepcopy(self.graph)
-        for vertex in graph_copy.vertices:
-            if vertex.name in self.observed_variables:
-                vertex.observed_value = self.get_data_for_vertex(data_instance, vertex)
-            else:
-                vertex.observed_value = None
-        mp_algorithm = MessagePassingAlgorithm(graph_copy, self.root, [0.5, 0.5])
-        mp_algorithm.compute_marginals()
-        return sum(mp_algorithm.marginals[mp_algorithm.root])
-
-
-
-    def get_data_for_vertex(self, data_instance, vertex: Vertex):
-        for i, observed_variable in enumerate(self.observed_variables):
-            if observed_variable == vertex.name:
-                return int(data_instance[i])
-        raise Exception("not found")
