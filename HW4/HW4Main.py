@@ -15,7 +15,7 @@ if option is 'C':
     algorithm = CompleteInferringAlgorithm(graph, graph.vertices[0], parser.data)
     algorithm.generate_sufficient_statistics()
     algorithm.update_graph_flip_probabilities()
-
+    algorithm.print()
 elif option is 'M':
     initial_parameters = [0.5] * len(graph.vertices)
     algorithm = MaximumProbabilityInferenceAlgorithm(graph, graph.vertices[0],
